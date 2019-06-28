@@ -11,12 +11,27 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 Session = sessionmaker()
-engine = sqlalchemy.create_engine(config['db']['type'] + '+' +
-                                  config['db']['adapter'] + '://' + 
-                                  config['db']['username'] + ':' +
-                                  config['db']['password'] + '@' +
-                                  config['db']['host'] + ':' +
-                                  config['db']['port'] + '/' +
-                                  config['db']['database'], pool_size=100, max_overflow=0) # the value of pool_size has to be less than the max_connections to postgres.
+
+connection_args = []
+connection_args.append(config['db']['type'])
+
+if config['db']['adapter']:
+	connection_args.extend(['+',config['db']['adapter']])
+
+connection_args.append('://')
+
+if config['db']['username']:
+	connection_args.append(config['db']['username'])
+	if config['db']['password']:
+		connection_args.extend([':',config['db']['password']])
+	connection_args.append('@')
+
+if config['db']['host']:
+	connection_args.append(config['db']['host'])
+	if config['db']['port']:
+		connection_args.extend([':',config['db']['port']])
+connection_args.extend(['/',config['db']['database']])
+
+engine = sqlalchemy.create_engine(''.join(connection_args)) # the value of pool_size has to be less than the max_connections to postgres.
 Session.configure(bind=engine)
 Base = declarative_base()
