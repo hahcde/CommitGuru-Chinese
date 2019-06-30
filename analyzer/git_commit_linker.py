@@ -1,3 +1,6 @@
+
+#<---le28June2019 modifications to print the timestamp of the fist commit that fixed the bug, in addition to the already printed timestamp of the buggy commit
+
 import re
 import os
 import subprocess
@@ -5,6 +8,7 @@ from orm.commit import *
 from caslogging import logging
 import json
 import re
+from collections import defaultdict 
 
 class GitCommitLinker:
   """
@@ -37,6 +41,7 @@ class GitCommitLinker:
     """
 
     linked_commits = {} # dict of buggy commit hash -> [corrective commits]
+    first_fixed_by = {} # dict of buggy commit hash -> first corrective commit associated to that bug <---le28June2019
 
     # find all bug introducing commits
     for corrective_commit in corrective_commits:
@@ -49,6 +54,10 @@ class GitCommitLinker:
         else:
           linked_commits[buggy_commit] = [corrective_commit.commit_hash]
 
+        # <---le28June2019 update information regarding the fix of this commit, to ontain the corrective commit that first fixed the buggy commit
+        if buggy_commit not in first_fixed_by or corrective_commit.author_date_unix_timestamp < first_fixed_by[buggy_commit].author_date_unix_timestamp:
+          first_fixed_by[buggy_commit] = corrective_commit
+
       corrective_commit.linked = True # mark that we have linked this corrective commit.
 
     for commit in all_commits:
@@ -56,7 +65,8 @@ class GitCommitLinker:
       if commit.commit_hash in linked_commits:
         commit.contains_bug = True
         commit.fixes = json.dumps(linked_commits[commit.commit_hash])
-
+        commit.first_fixed_by = first_fixed_by[commit.commit_hash].commit_hash # <---le28June2019 store first fix hash here, to be placed into the database later on
+        commit.unix_timestamp_first_fix = first_fixed_by[commit.commit_hash].author_date_unix_timestamp #le28June2019 store timestamp of the first fix here, to be placed into the databse later on
 
   def _linkCorrectiveCommit(self, commit):
     """

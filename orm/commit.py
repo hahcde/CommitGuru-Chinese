@@ -27,6 +27,12 @@ class Commit(Base):
 
     contains_bug = Column(Boolean, unique=False, default=False)
     fixes = Column(String, unique=False)
+
+    # <---le28June2019
+    # Columns to contain the id and timestamp of the first commit that tried to fix the buggy commit, if this is a buggy commit
+    first_fixed_by = Column(String, unique=False, default=None)
+    unix_timestamp_first_fix = Column(String, unique=False, default=None)
+
     ns = Column(Float, unique=False, default=0)
     nd = Column(Float, unique=False, default=0)
     nf = Column(Float, unique=False, default=0)
