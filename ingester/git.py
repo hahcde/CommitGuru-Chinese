@@ -247,7 +247,7 @@ class Git():
         else:
             cmd = 'git log '
 
-        log = str( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ) )
+        log = str( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ).decode("utf8") )
         log = log[2:-1]   # Remove head/end clutter
 
         # List of json objects
@@ -270,7 +270,7 @@ class Git():
             classification = None                       # classification of the commit (i.e., corrective, feature addition, etc)
             isMerge = False                             # whether or not the change is a merge
 
-            commit = commit.replace('\\x', '\\u00')   # Remove invalid json escape characters
+            #commit = commit.replace('\\x', '\\u00')   # Remove invalid json escape characters
             splitCommitStat = commit.split("CAS_READER_STOPPRETTY")  # split the commit info and its stats
 
             # The first split will contain an empty list
@@ -319,7 +319,7 @@ class Git():
                         fix = True
 
 
-                commitObject += "," + propStr[0:-1]
+                commitObject += "," + propStr[0:-1].replace("\n","\\n").replace("\t","\\t") #<---le removing invalid characters
                 # End property loop
             # End pretty info loop
 
