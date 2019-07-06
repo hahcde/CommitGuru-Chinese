@@ -91,7 +91,7 @@ class Git():
             if( stat == ' ' or stat == '' ):
                 continue
 
-            fileStat = stat.split("\\t")
+            fileStat = stat.split("\t") #<---le-fix when using utf-8 decoding, change from \\t to \t
 
              # Check that we are only looking at file stat (i.e., remove extra newlines)
             if( len(fileStat) < 2):
@@ -322,7 +322,7 @@ class Git():
             # End pretty info loop
 
             # Get the stat properties
-            stats = statCommit.split("\\n")
+            stats = statCommit.split("\n") # when using utf-8 decoding, change this from \\n to \n <---le-fix
             commitObject += self.getCommitStatsProperties(stats, commitFiles, devExperience, author, unixTimeStamp)
 
             # Update the classification of the commit
