@@ -91,7 +91,7 @@ class Git():
             if( stat == ' ' or stat == '' ):
                 continue
 
-            fileStat = stat.split("\t") #<---le-fix when using utf-8 decoding, change from \\t to \t
+            fileStat = stat.split("\t") #<---le-fix when using utf-8 decoding for the git log results, change from \\t to \t
 
              # Check that we are only looking at file stat (i.e., remove extra newlines)
             if( len(fileStat) < 2):
@@ -247,8 +247,9 @@ class Git():
         else:
             cmd = 'git log '
 
-        log = str( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ).decode("utf8") )
+        log = str( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ).decode("utf8") ) # <---le using utf-8 for the git log results, so that we can handle Chinese and other characters
         #log = log[2:-1]   # Remove head/end clutter
+        print(log)
 
         # List of json objects
         json_list = []
@@ -322,7 +323,7 @@ class Git():
             # End pretty info loop
 
             # Get the stat properties
-            stats = statCommit.split("\n") # when using utf-8 decoding, change this from \\n to \n <---le-fix
+            stats = statCommit.split("\n") # when using utf-8 decoding for the git log results, change this from \\n to \n <---le-fix
             commitObject += self.getCommitStatsProperties(stats, commitFiles, devExperience, author, unixTimeStamp)
 
             # Update the classification of the commit
