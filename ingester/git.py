@@ -248,7 +248,7 @@ class Git():
             cmd = 'git log '
 
         log = str( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ).decode("utf8") )
-        log = log[2:-1]   # Remove head/end clutter
+        #log = log[2:-1]   # Remove head/end clutter
 
         # List of json objects
         json_list = []
@@ -284,13 +284,11 @@ class Git():
             # Start with the commit info (i.e., commit hash, author, date, subject, etc)
             prettyInfo = prettyCommit.split(',CAS_READER_PROP_DELIMITER2    "')
             for propValue in prettyInfo:
-                props = propValue.split('"CAS_READER_PROP_DELIMITER: "')
-                propStr = ''
+                props = propValue.split('"CAS_READER_PROP_DELIMITER: "',1)
+                values = []
                 for prop in props:
                     prop = prop.replace('\\','').replace("\\n", '')  # avoid escapes & newlines for JSON formatting
-                    propStr = propStr + '"' + prop.replace('"','') + '":'
-
-                values = propStr[0:-1].split(":")
+                    values.append('"'+prop.replace('"','')+'"')
 
                 if(values[0] == '"    parent_hashes"'):
                     # Check to see if this is a merge change. Fix for Issue #26. 
@@ -319,7 +317,7 @@ class Git():
                         fix = True
 
 
-                commitObject += "," + propStr[0:-1].replace("\n","\\n").replace("\t","\\t") #<---le removing invalid characters
+                commitObject += "," + ":".join(values).replace("\n","\\n").replace("\t","\\t") #<---le removing invalid characters
                 # End property loop
             # End pretty info loop
 
