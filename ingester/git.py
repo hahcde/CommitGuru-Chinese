@@ -249,7 +249,7 @@ class Git():
 
         log = str( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ).decode("utf8") ) # <---le using utf-8 for the git log results, so that we can handle Chinese and other characters
         #log = log[2:-1]   # Remove head/end clutter
-        print(log)
+        #print(log)
 
         # List of json objects
         json_list = []
