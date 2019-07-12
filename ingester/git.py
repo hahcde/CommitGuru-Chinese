@@ -289,6 +289,8 @@ class Git():
                 values = []
                 for prop in props:
                     prop = prop.replace('\\','').replace("\\n", '')  # avoid escapes & newlines for JSON formatting
+                    if prop.startswith("\b"):
+                        prop = prop.replace("\b",'',1) # if the property starts with a backspace character, it will not enable us to add our quotation marks for Json formatting. So, we need to prevent the first character being a backspace <---le
                     values.append('"'+prop.replace('"','')+'"')
 
                 if(values[0] == '"    parent_hashes"'):
@@ -317,7 +319,6 @@ class Git():
                     if classification == "Corrective":
                         fix = True
 
-
                 commitObject += "," + ":".join(values).replace("\n","\\n").replace("\t","\\t") #<---le removing invalid characters
                 # End property loop
             # End pretty info loop
@@ -337,6 +338,7 @@ class Git():
 
             # Add commit object to json_list
             json_list.append(json.loads('{' + commitObject + '}'))
+
         # End commit loop
 
         logging.info('Done getting/parsing git commits.')
