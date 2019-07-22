@@ -37,12 +37,11 @@ class MetricsGenerator:
 		builds all models and stores them in the metrics table
 		"""
 		self.fetchAllMetrics() # first get all metrics
-
+	
 		# Only use training data b/c if new bugs are introduced in newer commits,
 		# then we do not know about it and therefore new data is unreliable. 
 		median_model = MedianModel(self.metrics, self.repo_id)
 		linear_reg_model = LinearRegressionModel(self.metrics, self.repo_id, self.testData)
-
 		median_model.buildModel() # build the median model
 		linear_reg_model.buildModel() # build the linear regression model & calculate the riskyness of each commit
 
@@ -59,7 +58,7 @@ class MetricsGenerator:
 		else:
 			dir_of_datasets = current_dir + "/datasets/monthly/"
 
-		with open(dir_of_datasets + self.repo_id + ".csv", "w") as file:
+		with open(dir_of_datasets + self.repo_id + ".csv", "w", encoding="utf-8-sig") as file:
 			csv_writer = csv.writer(file, dialect="excel")
 			columns = Commit.__table__.columns.keys()
 
@@ -81,7 +80,7 @@ class MetricsGenerator:
 		@private
 		"""
 		for commit in self.trainingData:
-
+			
 			# Exclude merge commits where no lines of code where changed
 			if commit.classification == "Merge" and commit.la == 0 and commit.ld == 0:
 				continue
