@@ -3,5 +3,5 @@ rm CASLog.log
 rm analyzer/datasets/*.csv
 rm -rf ingester/CASRepos/git/*
 python script.py initDb
-python create_repositories.py xiliutech-mobile file:///rds/homes/m/minkull/spdisc-restrict/XiliuTech/ideapod-mobile
+python create_repositories.py <<name for repository>> <<repository location>>
 python script.py
