@@ -142,5 +142,6 @@ SH
 TCL
 VBS
 VUE
+XML
 XPL
 ebuild
