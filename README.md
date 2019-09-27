@@ -3,7 +3,7 @@ CAS_CodeRepoAnalyzer
 
 Ingests and analyzes code repositories.
 
-==> This implementation is a modification of the original Commit.Guru code to enable processing git repositories with commit messages in Chinese.
+==> This implementation is a modification of the original Commit.Guru code to enable processing git repositories with commit messages in Chinese and to collect information about the timestamp when the defects linked to software changes were fixed.
 
 ##Installation
 1. Clone this repository in to an empty directory
