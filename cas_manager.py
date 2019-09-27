@@ -48,7 +48,8 @@ class CAS_Manager(threading.Thread):
 			logging.info("Adding repo " + repo.id + " to work queue for ingesting")
 			repo.status = "In Queue to be Ingested"
 			session.commit() # update the status of repo
-			self.workQueue.add_task(ingest,repo.id)
+			#self.workQueue.add_task(ingest,repo.id) # Replace the line below by this line if you wish to allow multiple threads. For SQLite, this wont work so well.
+			ingest(repo.id)
 
 		session.close()
 
@@ -68,7 +69,8 @@ class CAS_Manager(threading.Thread):
 			logging.info("Adding repo " + repo.id + " to work queue for analyzing.")
 			repo.status = "In Queue to be Analyzed"
 			session.commit() # update the status of repo
-			self.workQueue.add_task(analyze, repo.id)
+			#self.workQueue.add_task(analyze, repo.id)  # Replace the line below by this line if you wish to allow multiple threads. For SQLite, this wont work so well.
+			analyze(repo.id)
 
 		session.close()
 
@@ -184,7 +186,7 @@ class CAS_Manager(threading.Thread):
 	def run(self):
 
 		while(True):
-			### --- Check repository table if there is any work to be done ---  ###
+		### --- Check repository table if there is any work to be done ---  ###
 			self.checkIngestion()
 			self.checkAnalyzation()
 			self.checkModel()
