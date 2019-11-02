@@ -6,6 +6,7 @@ import math                               # Required for the math.log function
 from ingester.commitFile import *         # Represents a file
 from classifier.classifier import *       # Used for classifying each commit
 import time
+import re
 
 """
 file: repository.py
@@ -243,11 +244,13 @@ class Git():
 
         # Spawn a git process and convert the output to a string
         if not firstSync and repo.ingestion_date is not None:
-            cmd = 'git log --after="' + repo.ingestion_date + '" '
+            cmd = 'git log --encoding="utf-8" --after="' + repo.ingestion_date + '" '
         else:
-            cmd = 'git log '
+            cmd = 'git log --encoding="utf-8" '
 
-        log = str( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ).decode("utf8") ) # <---le using utf-8 for the git log results, so that we can handle Chinese and other characters
+        #print('"'+repr(subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ))[14180025:14180030]+'"')
+        #print( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ))
+        log = str( subprocess.check_output(cmd + self.LOG_FORMAT, shell=True, cwd = repo_dir ).decode("utf8") ) # <---le using utf8 for the git log results, so that we can handle Chinese and other characters
         #log = log[2:-1]   # Remove head/end clutter
         #print(log)
 
@@ -271,7 +274,7 @@ class Git():
             classification = None                       # classification of the commit (i.e., corrective, feature addition, etc)
             isMerge = False                             # whether or not the change is a merge
 
-            #commit = commit.replace('\\x', '\\u00')   # Remove invalid json escape characters
+            #commit = commit.replace("\\x", " ")   # Remove invalid json escape characters
             splitCommitStat = commit.split("CAS_READER_STOPPRETTY")  # split the commit info and its stats
 
             # The first split will contain an empty list
@@ -322,6 +325,7 @@ class Git():
                         fix = True
 
                 commitObject += "," + ":".join(values).replace("\n","\\n").replace("\t","\\t").replace("\r","\\r") #<---le removing invalid characters
+                commitObject = commitObject.replace("\x09"," ").replace('\x08', ' ').replace("\x07", " ").replace("\x06"," ").replace("\x05"," ").replace("\x04"," ").replace("\x03"," ").replace("\x02"," ").replace("\x01"," ").replace("\x00"," ") # <---letest
                 # End property loop
             # End pretty info loop
 
@@ -339,6 +343,8 @@ class Git():
             commitObject = commitObject[1:].replace('    ','')
 
             # Add commit object to json_list
+            #if len(commitObject) > 599: # <---letest
+            #    print('Test: "' + repr(commitObject[596:599]) + '"') # <---letest
             json_list.append(json.loads('{' + commitObject + '}'))
 
         # End commit loop
