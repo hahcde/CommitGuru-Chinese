@@ -1,8 +1,8 @@
 [![DOI](https://zenodo.org/badge/192493650.svg)](https://zenodo.org/badge/latestdoi/192493650)
 
 
-CAS_CodeRepoAnalyzer
-====================
+CommitGuru - Chinese, CAS_CodeRepoAnalyzer
+==========================================
 
 Ingests and analyzes code repositories.
 
