@@ -47,7 +47,7 @@ class Git():
 
     REPO_DIRECTORY = "/CASRepos/git/"        # directory in which to store repositories
 
-    def getCommitStatsProperties( stats, commitFiles, devExperience, author, unixTimeStamp ):
+    def getCommitStatsProperties(repo_dir, commit_hash, stats, commitFiles, devExperience, author, unixTimeStamp ):
         """
         getCommitStatsProperties
         Helper method for log. Caclulates statistics for each change/commit and
@@ -110,7 +110,16 @@ class Git():
             fileName = (fileStat[2].replace("'",'').replace('"','').replace("\\",""))
 
             totalModified = fileLa + fileLd
-
+            cmd_get_branch = "git branch --show-current"
+            current_branch = str( subprocess.check_output(cmd_get_branch, shell=True, cwd = repo_dir ).decode("utf8") )
+            cmd_checkout1 = "git checkout " + str(commit_hash)
+            cmd_checkout2 = "git checkout " + str(current_branch)
+            _ = subprocess.check_output(cmd_checkout1, shell=True, cwd = repo_dir ).decode("utf8")
+            cmd_get_file_length = "git blame -w -c " + fileName + " | wc -l"
+            cur_loc = int( subprocess.check_output(cmd_get_file_length, shell=True, cwd = repo_dir ).decode("utf8") )
+            _ = subprocess.check_output(cmd_checkout2, shell=True, cwd = repo_dir ).decode("utf8")
+            cur_loc = cur_loc + fileLd - fileLa
+            lt += cur_loc
             # have we seen this file already?
             if(fileName in commitFiles):
                 prevFileChanged = commitFiles[fileName]
@@ -119,7 +128,7 @@ class Git():
                 prevChanged = getattr(prevFileChanged, 'lastchanged')
                 file_nuc = getattr(prevFileChanged, 'nuc')
                 nuc += file_nuc
-                lt += prevLOC
+                # lt += prevLOC
 
                 for prevAuthor in prevAuthors:
                     if prevAuthor not in authors:
@@ -273,6 +282,7 @@ class Git():
             fix = False                                 # whether or not the change is a defect fix
             classification = None                       # classification of the commit (i.e., corrective, feature addition, etc)
             isMerge = False                             # whether or not the change is a merge
+            commit_hash = ""                            # hash of commit
 
             #commit = commit.replace("\\x", " ")   # Remove invalid json escape characters
             splitCommitStat = commit.split("CAS_READER_STOPPRETTY")  # split the commit info and its stats
@@ -323,6 +333,9 @@ class Git():
                     # If it is a corrective commit, we induce it fixes a bug somewhere in the system
                     if classification == "Corrective":
                         fix = True
+                # find the hash of the commit
+                if(values[0] == '"commit_hash"'):
+                    commit_hash = values[1].replace('"','')
 
                 commitObject += "," + ":".join(values).replace("\n","\\n").replace("\t","\\t").replace("\r","\\r") #<---le removing invalid characters
                 commitObject = commitObject.replace("\x09"," ").replace('\x08', ' ').replace("\x07", " ").replace("\x06"," ").replace("\x05"," ").replace("\x04"," ").replace("\x03"," ").replace("\x02"," ").replace("\x01"," ").replace("\x00"," ") # <---letest
@@ -331,7 +344,7 @@ class Git():
 
             # Get the stat properties
             stats = statCommit.split("\n") # when using utf-8 decoding for the git log results, change this from \\n to \n <---le-fix
-            commitObject += self.getCommitStatsProperties(stats, commitFiles, devExperience, author, unixTimeStamp)
+            commitObject += self.getCommitStatsProperties(repo_dir, commit_hash, stats, commitFiles, devExperience, author, unixTimeStamp)
 
             # Update the classification of the commit
             commitObject += ',"classification":"' + str( classification ) + '\"'
