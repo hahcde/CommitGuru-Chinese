@@ -110,9 +110,12 @@ class Git():
             fileName = (fileStat[2].replace("'",'').replace('"','').replace("\\",""))
 
             totalModified = fileLa + fileLd
-            cmd_get_loc = "git show " + parent_hash + ":"+fileName+" | wc -l"
-            cur_loc = int( subprocess.check_output(cmd_get_loc, shell=True, cwd = repo_dir ).decode("utf8") )
-            lt += cur_loc
+            if (parent_hash is None) or (parent_hash == ""):
+                lt += 0
+            else:
+                cmd_get_loc = "git blame -e " + parent_hash + " -- " + fileName + " | wc -l"
+                cur_loc = int( subprocess.check_output(cmd_get_loc, shell=True, cwd = repo_dir ).decode("utf8").replace("\n",""))
+                lt += cur_loc
             # have we seen this file already?
             if(fileName in commitFiles):
                 prevFileChanged = commitFiles[fileName]
