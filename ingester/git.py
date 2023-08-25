@@ -47,7 +47,7 @@ class Git():
 
     REPO_DIRECTORY = "/CASRepos/git/"        # directory in which to store repositories
 
-    def getCommitStatsProperties(repo_dir, commit_hash, stats, commitFiles, devExperience, author, unixTimeStamp ):
+    def getCommitStatsProperties(repo_dir, parent_hash, stats, commitFiles, devExperience, author, unixTimeStamp ):
         """
         getCommitStatsProperties
         Helper method for log. Caclulates statistics for each change/commit and
@@ -110,15 +110,8 @@ class Git():
             fileName = (fileStat[2].replace("'",'').replace('"','').replace("\\",""))
 
             totalModified = fileLa + fileLd
-            cmd_get_branch = "git branch --show-current"
-            current_branch = str( subprocess.check_output(cmd_get_branch, shell=True, cwd = repo_dir ).decode("utf8") )
-            cmd_checkout1 = "git checkout " + str(commit_hash)
-            cmd_checkout2 = "git checkout " + str(current_branch)
-            _ = subprocess.check_output(cmd_checkout1, shell=True, cwd = repo_dir ).decode("utf8")
-            cmd_get_file_length = "git blame -w -c " + fileName + " | wc -l"
-            cur_loc = int( subprocess.check_output(cmd_get_file_length, shell=True, cwd = repo_dir ).decode("utf8") )
-            _ = subprocess.check_output(cmd_checkout2, shell=True, cwd = repo_dir ).decode("utf8")
-            cur_loc = cur_loc + fileLd - fileLa
+            cmd_get_loc = "git show " + parent_hash + ":"+fileName+" | wc -l"
+            cur_loc = int( subprocess.check_output(cmd_get_loc, shell=True, cwd = repo_dir ).decode("utf8") )
             lt += cur_loc
             # have we seen this file already?
             if(fileName in commitFiles):
@@ -282,7 +275,7 @@ class Git():
             fix = False                                 # whether or not the change is a defect fix
             classification = None                       # classification of the commit (i.e., corrective, feature addition, etc)
             isMerge = False                             # whether or not the change is a merge
-            commit_hash = ""                            # hash of commit
+            parent_hash = ""                            # hash of commit
 
             #commit = commit.replace("\\x", " ")   # Remove invalid json escape characters
             splitCommitStat = commit.split("CAS_READER_STOPPRETTY")  # split the commit info and its stats
@@ -315,6 +308,7 @@ class Git():
                     parents = values[1].split(' ')
                     if len(parents) == 2:
                         isMerge = True
+                    parent_hash = parents[1].replace(" ","").replace('"', '')
 
                 if(values[0] == '"author_name"'):
                     author = values[1].replace('"', '')
@@ -344,7 +338,7 @@ class Git():
 
             # Get the stat properties
             stats = statCommit.split("\n") # when using utf-8 decoding for the git log results, change this from \\n to \n <---le-fix
-            commitObject += self.getCommitStatsProperties(repo_dir, commit_hash, stats, commitFiles, devExperience, author, unixTimeStamp)
+            commitObject += self.getCommitStatsProperties(repo_dir, parent_hash, stats, commitFiles, devExperience, author, unixTimeStamp)
 
             # Update the classification of the commit
             commitObject += ',"classification":"' + str( classification ) + '\"'
